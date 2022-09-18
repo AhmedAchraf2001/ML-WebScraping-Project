@@ -1,0 +1,5525 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "716f1c22",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "7772528d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "a441f221",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "ceb8f9e7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.dtype"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "d73a8c73",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def customizer(val):\n",
+    "    str(val)          # we used str() because float-point number not accessable ---> 'float value is not subscriptable object'\n",
+    "    if (val[-1] == 'm'): \n",
+    "        val = pd.to_numeric(val[1:-1])  \n",
+    "        return val*10**6\n",
+    "    \n",
+    "    elif (val[-1] == '.'):\n",
+    "        val = pd.to_numeric(val[1:-3])\n",
+    "        return val*10**3\n",
+    "    \n",
+    "    else:\n",
+    "        return ''"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "cab6b756",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "db959d07",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def customizer(val):\n",
+    "    str(val)          # we used str() because float-point number not accessable ---> 'float value is not subscriptable object'\n",
+    "    if (val[-1] == 'm'): \n",
+    "        val = pd.to_numeric(val[1:-1])  \n",
+    "        return val*10**6\n",
+    "    \n",
+    "    else:\n",
+    "        val = pd.to_numeric(val[1:-3])\n",
+    "        return val*10**3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "2e65024b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "8ab48058",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.apply(lambda val : pd.to_numeric(str(val)[1:-1])*10**6 if(str(val)[-1] == 'm') else pd.to_numeric(str(val)[1:-3])*10**3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "1632cd13",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "faff414f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "5b7e5c6c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "afdbe44b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age = data.age.astype('f2')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "c6d2d7d6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "d40cbf2e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.astype('f4')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "4064720f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "3374dc94",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data['country_origin_club']=='Egypt']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "a4b76e5c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#drop unuseful features\n",
+    "data.drop(['league_origin_club', 'league_new_club','date_of_transfer'], axis=1, inplace= True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "cd9bbc7a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(f\"No. origin country : {len(data['country_origin_club'].value_counts())}\")\n",
+    "print(f\"No. new country : {len(data['country_new_club'].value_counts())}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "fc1b063d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.position.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "bddeb63c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[2753:2758]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "6cbbfa8a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {2753: 'Right-Back' , 2754: 'Centre-Forward', 2755: 'Centre-Back', 2756: 'midfield', 2757: 'midfield'}},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "2f13fa64",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[25188:25193]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "8de12e3c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "playersNames = data.name[25188:25193].tolist()\n",
+    "playersNames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "e04a5557",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {25188: 'Right-Back' , 25189: 'Centre-Forward', 25190: 'GoalKeeper', 25191: 'attack', 25192: 'Left-Back'} \n",
+    "              , 'age': {25188: 29 , 25189: 21, 25190: 20, 25191: 20, 25192: 21}\n",
+    "              , 'origin_club': {25188: 'Persiba' , 25189: 'Puebla', 25190: 'Lippstadt', 25191: 'Huddersfield Town', 25192: 'Olimpija'}}\n",
+    "             ,inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "eb548ff5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i in data['position'].value_counts().index:\n",
+    "    print(i)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "f02fd4d4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "210df9b5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.new_club.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "9f09a87d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[5420:5424]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "7ca8916c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[5420:5424].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "22e149ad",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li8 = ['Vigor Lamezia', 'Darya Caspian', 'Banbueng FC', 'Ipswich']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "36b85b62",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': {5420: 'Vigor Lamezia' , 5421: 'Darya Caspian', 5422: 'Banbueng FC', 5423: 'Ipswich'}},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "069921c6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[9278:9280]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "576f79a9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[9278:9280].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "9b48f3ad",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([9278,9279], li1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "90956fce",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li1 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li1.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "6ee8b33d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li1 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li1.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "739579c1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([9278,9279], li1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "fc15b6b3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "e73c5223",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[31461:31465]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "c6e2127d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[31461:31465].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "id": "519a8fda",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li2 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li2.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "id": "38f20bfd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(31461,31465,1)], li2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "id": "20b35909",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "id": "439e76ed",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.cost.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "id": "4438df95",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[21008:21012]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "id": "60182d72",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[9278:9280]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "id": "da82bd83",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(31461,31465,1)], li2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "id": "77b81585",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "id": "ad49dfdd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.cost.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "id": "c1643c89",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[31461:31465]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "6737351d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[21008:21012]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "id": "32e595f8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "namesOfcost = data.name[21008:21012].tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "id": "43ddc036",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li3 = []\n",
+    "for i in namesOfcost:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"rechts hauptlink\"]')\n",
+    "    li3.append(player.text)\n",
+    "    \n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "id": "b1fbe396",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer('€75Th.')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "id": "99548c0a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(21008,21012,1)], [ customizer(y) for y in li3]))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "id": "b6775487",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'cost': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "id": "8e29d094",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('Average in ')\n",
+    "for i in data['country_origin_club'].value_counts().index[0:].to_list():\n",
+    "    print( f'{i} :        { data.age[data.country_origin_club == i].mean() }' )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "id": "14f1d742",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "namesOfAge = []\n",
+    "indexOfAge = []\n",
+    "for i in data.age.isna():\n",
+    "    if i == True: \n",
+    "        namesOfAge.append(data.name.iloc[c])\n",
+    "        indexOfAge.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "id": "bc5a1fb9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(len(namesOfAge))\n",
+    "namesOfAge"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "id": "81d8fe53",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ages = [37, 22, 22, 32, 38, 27, 29, 29, 20, 54, 23, 54, 23, 40, 29, 28, 27, 30]\n",
+    "Idx = [4495,6973, 8253, 10008, 12395, 12564, 13974, 23171, 25742, 25945, 26003, 26074, 27572, 32895, 33174, 33243,33423,29557]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "id": "90f5d892",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip(Idx, ages))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "id": "7ac26ad1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 64,
+   "id": "d138f215",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'age': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "id": "3882e809",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 66,
+   "id": "1860b353",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 67,
+   "id": "9f98c370",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 68,
+   "id": "f8918850",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ data['country_origin_club'] == 'Egypt' ].head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "id": "b3458b58",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ data['country_origin_club'] == 'Egypt' ].head(4)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 70,
+   "id": "8113716e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "print('position age')\n",
+    "li7 = []\n",
+    "for i in playersNames:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    \n",
+    "    for player in ffx.find_elements(By.CSS_SELECTOR,'td[class= \"zentriert\"]'):\n",
+    "        li7.append(player.text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li7)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 71,
+   "id": "b19954b1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 72,
+   "id": "6145880b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.postion.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 73,
+   "id": "b7edf09b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.position.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 74,
+   "id": "bf013c91",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 75,
+   "id": "833e2912",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li8 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li8.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li8)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 76,
+   "id": "3dd13efe",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[5420:5424].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 77,
+   "id": "2a457b77",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li8 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li8.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li8)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 78,
+   "id": "dd4302c9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(5420,5424,1)],li8))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 79,
+   "id": "842a008a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic },inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 80,
+   "id": "b6389a1a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li1 = ['NK Pesnica', 'Galway United']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 81,
+   "id": "8204d0f3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([9278,9279], li1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 82,
+   "id": "f3482252",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 83,
+   "id": "0805ec38",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(31461,31465,1)], li2))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 84,
+   "id": "dec84ed7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([9278,9279], li1))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 85,
+   "id": "272bd241",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(5420,5424,1)],li8))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 86,
+   "id": "02d8e159",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li8 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li8.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li8)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 87,
+   "id": "b89d8fc2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li8 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li8.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li8)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 88,
+   "id": "5c031a9c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li2 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li2.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "id": "a03d91dd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[31461:31465].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 90,
+   "id": "2a0f82bb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li2 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li2.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "id": "bf61c830",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li2 = ['Without Club', 'Without Club', 'Alavés', 'Without Club']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 92,
+   "id": "94f20a41",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(31461,31465,1)], li2))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 93,
+   "id": "7567d301",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 94,
+   "id": "952165cf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 95,
+   "id": "2d455389",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.cost.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 96,
+   "id": "84e13dd1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.cost.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 97,
+   "id": "c0f22053",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[21008:21012]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 98,
+   "id": "8ae635cd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "namesOfcost = data.name[21008:21012].tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 99,
+   "id": "652744f4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li3 = []\n",
+    "for i in namesOfcost:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"rechts hauptlink\"]')\n",
+    "    li3.append(player.text)\n",
+    "    \n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 100,
+   "id": "c70cb74c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "namesOfcost = data.name[21008:21012].tolist()\n",
+    "namesOfcost"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 101,
+   "id": "bdab86d2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 102,
+   "id": "27a42ad3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€10th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 103,
+   "id": "1198272d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€10m\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 104,
+   "id": "25247fe3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 105,
+   "id": "e79342f9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li1 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li1.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 106,
+   "id": "c8ee387f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li1 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li1.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 107,
+   "id": "843d8cc8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[9278:9280].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 108,
+   "id": "18853ab9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li1 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li1.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 109,
+   "id": "a94cf268",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'cost': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 110,
+   "id": "4a50194c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 111,
+   "id": "d7b89464",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 112,
+   "id": "4d77861c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('Average in ')\n",
+    "for i in data['country_origin_club'].value_counts().index[0:].to_list():\n",
+    "    print( f'{i} :        { data.age[data.country_origin_club == i].mean() }' )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 113,
+   "id": "36f2c4c8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "namesOfAge = []\n",
+    "indexOfAge = []\n",
+    "for i in data.age.isna():\n",
+    "    if i == True: \n",
+    "        namesOfAge.append(data.name.iloc[c])\n",
+    "        indexOfAge.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 114,
+   "id": "586296ef",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(len(namesOfAge))\n",
+    "namesOfAge"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 115,
+   "id": "03482cc5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c =0 \n",
+    "indexL = []\n",
+    "for i in data.age.isna():\n",
+    "    if i.country_origin_club == 'Iran':\n",
+    "        indexL.append(c)\n",
+    "    c+=1\n",
+    "print(indexL)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 116,
+   "id": "b7e03bc7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c =0 \n",
+    "indexL = []\n",
+    "for i in data[data.age.isna()]:\n",
+    "    if i.country_origin_club == 'Iran':\n",
+    "        indexL.append(c)\n",
+    "    c+=1\n",
+    "print(indexL)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 117,
+   "id": "9aad5cb3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c =0 \n",
+    "indexL = []\n",
+    "for i in data['age'][data.age.isna()]:\n",
+    "    if i.country_origin_club == 'Iran':\n",
+    "        indexL.append(c)\n",
+    "    c+=1\n",
+    "print(indexL)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 118,
+   "id": "632d9ee5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c =0 \n",
+    "indexL = []\n",
+    "for i in data.age.isna().country_origin_club == 'Iran':\n",
+    "    indexL.append(c)\n",
+    "    c+=1\n",
+    "print(indexL)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 119,
+   "id": "12a519a2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c =0 \n",
+    "indexL = []\n",
+    "for i in data[data.age.isna()].country_origin_club == 'Iran':\n",
+    "    indexL.append(c)\n",
+    "    c+=1\n",
+    "print(indexL)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 120,
+   "id": "02874eba",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c =0 \n",
+    "indexL = []\n",
+    "for i in data[data.age.isna()].country_origin_club == 'Iran':\n",
+    "    indexL.append(c)\n",
+    "    c+=1\n",
+    "print(len(indexL))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 121,
+   "id": "2c02251a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 122,
+   "id": "c70ecf3d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()].country_origin_club == 'Iran'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 123,
+   "id": "2d31784c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna() & country_origin_club == 'Iran']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 124,
+   "id": "01d07676",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna() & data.country_origin_club == 'Iran']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 125,
+   "id": "964e661f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[(data.age.isna()) & (data.country_origin_club == 'Iran')]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 126,
+   "id": "7fc3de6f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[(data.age.isna()) & (data.country_origin_club == 'Iran')].indec"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 127,
+   "id": "6d666a4f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[(data.age.isna()) & (data.country_origin_club == 'Iran')].index"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 128,
+   "id": "595620f0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[(data.age.isna()) & (data.country_origin_club == 'Iran')].index.tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 129,
+   "id": "4458b43b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "idxOfIran = data[(data.age.isna()) & (data.country_origin_club == 'Iran')].index.tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 130,
+   "id": "09867402",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts().tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 131,
+   "id": "48c020e9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts().index[0].tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 132,
+   "id": "532e98bc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts().index[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 133,
+   "id": "103f2dc2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts().index"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 134,
+   "id": "627efb2a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts().index.tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 135,
+   "id": "e1399756",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 136,
+   "id": "0301d9b2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 137,
+   "id": "b9bca7f5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 138,
+   "id": "7dd80467",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['age'][data.country_origin_club = 'Iran']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 139,
+   "id": "d80872b8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['age'][data.country_origin_club == 'Iran'].mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 140,
+   "id": "c274e11b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['age'][data.country_origin_club == country].mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 141,
+   "id": "8bb3265b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['age'][data.country_origin_club == 'Iran'].mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 142,
+   "id": "b7b21ce9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country].mean()\n",
+    "    data.age.fillna({Idx:avg}, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 143,
+   "id": "96d2c587",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country].mean()\n",
+    "    data.age.fillna({avg:Idx}, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 144,
+   "id": "ea493184",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna.sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 145,
+   "id": "5bdc1165",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna(.sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 146,
+   "id": "c38a8398",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 147,
+   "id": "b0e8b24a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = [5]\n",
+    "li = li *5\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 148,
+   "id": "968809bc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = [5]\n",
+    "li = li *20\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 149,
+   "id": "96d45c97",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = [5]\n",
+    "li = li *30\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 150,
+   "id": "55b5953b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = '5'\n",
+    "li = li *30\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 151,
+   "id": "ecb56951",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = '5'\n",
+    "list(li)\n",
+    "li = li *30\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 152,
+   "id": "bd1d0f16",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = '5'\n",
+    "li = list(li)\n",
+    "li = li *30\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 153,
+   "id": "3bd53b3e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 154,
+   "id": "f3444f87",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 155,
+   "id": "5e2a14c7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "idxOfIran = data[(data.age.isna()) & (data.country_origin_club == 'Iran')].index.tolist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 156,
+   "id": "7995d2e1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "idxOfIran = data[(data.age.isna()) & (data.country_origin_club == 'Iran')].index.tolist()\n",
+    "idxOfIran"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 157,
+   "id": "dc996987",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "len(data[(data.age.isna()) & (data.country_origin_club == 'Iran')].index.tolist())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 158,
+   "id": "3f65d666",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "len(data[(data.age.isna()) & (data.country_origin_club == 'France')].index.tolist())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 159,
+   "id": "5e6b84b4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country].mean()\n",
+    "    avg = list(avg)\n",
+    "    avg *= len(Idx)\n",
+    "    dic = dict(zip( Idx , avg ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 160,
+   "id": "54594521",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5\n",
+    "li = list(li)\n",
+    "li = li *30\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 161,
+   "id": "a8f01282",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5\n",
+    "li = str(li)\n",
+    "li = list(li)\n",
+    "li = li *30\n",
+    "li"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 162,
+   "id": "f6979657",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "li = list(li)\n",
+    "li = li *30\n",
+    "li = "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 163,
+   "id": "fc5ded65",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "li = list(li)\n",
+    "li = li *30\n",
+    "li "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 164,
+   "id": "ea15c679",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "\n",
+    "li "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 165,
+   "id": "6cbdad4d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "\n",
+    "li "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 166,
+   "id": "e846442d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "li = list(li)\n",
+    "\n",
+    "li "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 167,
+   "id": "bea5e9ae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "li = list(float(li))\n",
+    "li = li *30\n",
+    "li "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 168,
+   "id": "e4e0b69d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li = 5.2525\n",
+    "li = str(li)\n",
+    "li = list(li)\n",
+    "li = li *30\n",
+    "li "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 169,
+   "id": "b7e6b51c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country].mean()\n",
+    "    avg = avg.round()\n",
+    "    avg = str(avg)\n",
+    "    avg = list(avg)\n",
+    "    avg *= len(Idx)\n",
+    "    \n",
+    "    dic = dict(zip( Idx , avg ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 170,
+   "id": "8f4ed5ca",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country].mean()\n",
+    "    avg = round(avg)\n",
+    "    avg = str(avg)\n",
+    "    avg = list(avg)\n",
+    "    avg *= len(Idx)\n",
+    "    \n",
+    "    dic = dict(zip( Idx , avg ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 171,
+   "id": "4d7f162a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 172,
+   "id": "888fc7e5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.52564\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "avg = str(avg)\n",
+    "avg = list(avg)\n",
+    "avg *= len(Idx)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 173,
+   "id": "5f19b77c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.52564\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "print(avg)\n",
+    "avg = str(avg)\n",
+    "print(avg)\n",
+    "avg = list(avg)\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "print(avg)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 174,
+   "id": "71cbe480",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.52564\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "print(avg)\n",
+    "avg = list(avg)\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "print(avg)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 175,
+   "id": "097d8fc0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.52564\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "print(avg)\n",
+    "avg = [str(i) for i in avg ]\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "print(avg)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 176,
+   "id": "53deecde",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.52564\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "print(avg)\n",
+    "avg = list(avg)\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "print(avg)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 177,
+   "id": "0dc1b9fc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.52564\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "print(avg)\n",
+    "avg = str(avg)\n",
+    "print(avg)\n",
+    "avg = list(avg)\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 178,
+   "id": "cabf1fdb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.2564\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "avg = round(avg)\n",
+    "print(avg)\n",
+    "avg = str(avg)\n",
+    "print(avg)\n",
+    "avg = list(avg)\n",
+    "print(avg)\n",
+    "\n",
+    "avg *= len(Idx)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 179,
+   "id": "ed7dbc77",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.2564\n",
+    "li = []\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "print(avg)\n",
+    "li.append(avg)\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 180,
+   "id": "a4ea4b2c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20\n",
+    "li = []\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "print(avg)\n",
+    "li.append(avg)\n",
+    "print(avg)\n",
+    "avg *= len(Idx)\n",
+    "dic = dict(zip( Idx , avg ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 181,
+   "id": "b6ce83ac",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20\n",
+    "li = []\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "print(avg)\n",
+    "li.append(avg)\n",
+    "print(avg)\n",
+    "li *= len(Idx)\n",
+    "print(li)\n",
+    "dic = dict(zip( Idx , li ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 182,
+   "id": "1c97a9e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg = 20.05454\n",
+    "li = []\n",
+    "print(avg)\n",
+    "Idx = [x for x in range(0,10,1)]\n",
+    "print(avg)\n",
+    "li.append(avg)\n",
+    "print(avg)\n",
+    "li *= len(Idx)\n",
+    "print(li)\n",
+    "dic = dict(zip( Idx , li ))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 183,
+   "id": "31479d50",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country].mean()\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 184,
+   "id": "6d9ac894",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    print(Idx)\n",
+    "    avg = data['age'][data.country_origin_club == country ].mean()\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 185,
+   "id": "696a27ea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 186,
+   "id": "3c25838e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 187,
+   "id": "47046e08",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 188,
+   "id": "70418a5e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 189,
+   "id": "a9f1f6c8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 190,
+   "id": "f46654f2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 191,
+   "id": "921318f5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 192,
+   "id": "fb9dedf5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 193,
+   "id": "ca438bff",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"Data has  \" + str(data.shape[0]) + \"  records and  \" + str(data.shape[1]) + \"  features\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 194,
+   "id": "4ee9545d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 195,
+   "id": "1005118f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 196,
+   "id": "e15f44e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#data['position'].replace(['Centre-Back', 'Right-Back', 'Left-Back'], 'defence', inplace=True)\n",
+    "#data['position'].replace(['Central Midfield', 'Defensive Midfield', 'Attacking Midfield','Right Midfield', 'Left Midfield'], 'midfield', inplace=True)\n",
+    "#data['position'].replace(['Centre-Forward', 'Left Winger', 'Right Winger','Second Striker'], 'attack', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 197,
+   "id": "45fa2633",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.dtype"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 198,
+   "id": "f523297c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def customizer(val):\n",
+    "    str(val)          # we used str() because float-point number not accessable ---> 'float value is not subscriptable object'\n",
+    "    if (val[-1] == 'm'): \n",
+    "        val = pd.to_numeric(val[1:-1])  \n",
+    "        return val*10**6\n",
+    "    \n",
+    "    else:\n",
+    "        val = pd.to_numeric(val[1:-3])\n",
+    "        return val*10**3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 199,
+   "id": "fbdfebc3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 200,
+   "id": "c3c7f9a5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.apply(lambda val : pd.to_numeric(str(val)[1:-1])*10**6 if(str(val)[-1] == 'm') else pd.to_numeric(str(val)[1:-3])*10**3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 201,
+   "id": "c42bdcaf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 202,
+   "id": "df8fc459",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 203,
+   "id": "1a4d711e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 204,
+   "id": "bc31b1f0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age = data.age.astype('f2')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 205,
+   "id": "4d724308",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 206,
+   "id": "298e1d69",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.astype('f4')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 207,
+   "id": "421bbbbb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 208,
+   "id": "778d0e08",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ data['country_origin_club'] == ' Egypt ' ].head(4)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 209,
+   "id": "7a08d46d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#drop unuseful features\n",
+    "data.drop([ 'league_origin_club' , 'league_new_club' , 'date_of_transfer' ], axis=1, inplace= True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 210,
+   "id": "bca120ae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.position.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 211,
+   "id": "dec56cb2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.position.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 212,
+   "id": "30de5762",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ 25188:25193 ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 213,
+   "id": "b07eed4c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "playersNames = data.name[25188:25193].tolist()\n",
+    "playersNames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 214,
+   "id": "49d4e809",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {25188: 'Right-Back' , 25189: 'Centre-Forward', 25190: 'GoalKeeper', 25191: 'attack', 25192: 'Left-Back'} \n",
+    "              , 'age': {25188: 29 , 25189: 21, 25190: 20, 25191: 20, 25192: 21}\n",
+    "              , 'origin_club': {25188: 'Persiba' , 25189: 'Puebla', 25190: 'Lippstadt', 25191: 'Huddersfield Town', 25192: 'Olimpija'}}\n",
+    "             ,inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 215,
+   "id": "f328a053",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {2753: 'Right-Back' , 2754: 'Centre-Forward', 2755: 'Centre-Back', 2756: 'midfield', 2757: 'midfield'}},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 216,
+   "id": "a78aaa0f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li8 = ['Vigor Lamezia', 'Darya Caspian', 'Banbueng FC', 'Ipswich']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 217,
+   "id": "9b92f530",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict( zip( [x for x in range(5420,5424,1)] ,li8) )\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 218,
+   "id": "a02bbaf9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic },inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 219,
+   "id": "8b7c3570",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[9278:9280]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 220,
+   "id": "cfec3e62",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[9278:9280].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 221,
+   "id": "a5a31413",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li1 = ['NK Pesnica', 'Galway United']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 222,
+   "id": "1b7cfb48",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([9278,9279], li1))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 223,
+   "id": "9be401f7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 224,
+   "id": "73f25660",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[31461:31465]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 225,
+   "id": "954c5c8f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[31461:31465].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 226,
+   "id": "2acef63c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li2 = ['Without Club', 'Without Club', 'Alavés', 'Without Club']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 227,
+   "id": "c1743f95",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(31461,31465,1)], li2))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 228,
+   "id": "ad14ca8b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 229,
+   "id": "4b46e930",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 230,
+   "id": "b8b984b8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.cost.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 231,
+   "id": "9bdfb223",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "namesOfcost = data.name[21008:21012].tolist()\n",
+    "namesOfcost"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 232,
+   "id": "15ba531e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li3 = ['€75Th.', '€100Th.', '€10Th.', '€75Th.']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 233,
+   "id": "0bf761e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer('€75Th.')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 234,
+   "id": "624fb9fd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(21008,21012,1)], [ customizer(y) for y in li3]))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 235,
+   "id": "e82f0fda",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'cost': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 236,
+   "id": "61a4afcc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 237,
+   "id": "07668a4e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('Average in ')\n",
+    "for i in data['country_origin_club'].value_counts().index[0:].to_list():\n",
+    "    print( f'{i} :        { data.age[data.country_origin_club == i].mean() }' )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 238,
+   "id": "273bf7fa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "namesOfAge = []\n",
+    "indexOfAge = []\n",
+    "for i in data.age.isna():\n",
+    "    if i == True: \n",
+    "        namesOfAge.append(data.name.iloc[c])\n",
+    "        indexOfAge.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 239,
+   "id": "4c6affde",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(len(namesOfAge))\n",
+    "namesOfAge"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 240,
+   "id": "00a60fd6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li4"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 241,
+   "id": "2131a8a5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ages = [37, 22, 22, 32, 38, 27, 29, 29, 20, 54, 23, 54, 23, 40, 29, 28, 27, 30]\n",
+    "Idx = [4495,6973, 8253, 10008, 12395, 12564, 13974, 23171, 25742, 25945, 26003, 26074, 27572, 32895, 33174, 33243,33423,29557]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 242,
+   "id": "3d9aebd0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip(Idx, ages))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 243,
+   "id": "ee33377c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'age': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 244,
+   "id": "0a414ece",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 245,
+   "id": "2210e0af",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clubs = []\n",
+    "index = []\n",
+    "for i in li5:\n",
+    "    if data.origin_club.loc[i] !=  \"Without Club\" and data.origin_club.loc[i] != 'Unknown' and data.origin_club.loc[i] != 'Career break':\n",
+    "        clubs.append(data.origin_club.loc[i])\n",
+    "        index.append(i)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 246,
+   "id": "09b918d2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li6 = ['Croatia', 'Ireland', 'unknown', 'Iran', 'Iran', 'Spain', 'Russia']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 247,
+   "id": "155bca49",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip(index,li6))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 248,
+   "id": "12244bdc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'country_origin_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 249,
+   "id": "34496228",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 250,
+   "id": "fea41878",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 251,
+   "id": "4fb22dfa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 252,
+   "id": "c3a3ce8f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country ].mean()\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 253,
+   "id": "28bb433c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.country_origin_club == 'Iran']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 254,
+   "id": "20d10807",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.country_origin_club == 'Syria']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 255,
+   "id": "e2cffe16",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.country_origin_club == 'Wales']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 256,
+   "id": "649b611e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.country_origin_club == 'Iraq']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 257,
+   "id": "a44150c1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country ].mean()\n",
+    "    print(Idx)\n",
+    "    print(country,avg)\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    print(li)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    print(dic)\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 258,
+   "id": "62727978",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 259,
+   "id": "68d3f420",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 260,
+   "id": "531a9013",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 261,
+   "id": "e704599f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 262,
+   "id": "a6eed3c5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 263,
+   "id": "626ed322",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 264,
+   "id": "a6e66077",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country ].mean()\n",
+    "    print(Idx)\n",
+    "    print(country,avg)\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    print(li)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    print(dic)\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 265,
+   "id": "8284a1cd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country ].mean()\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 266,
+   "id": "4deb8eae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.to_csv('Cleaned Data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 267,
+   "id": "f43fe5b8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 268,
+   "id": "8d332300",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 269,
+   "id": "ac4db026",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data', index_col=0)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 270,
+   "id": "ab75b019",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 271,
+   "id": "e7683159",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.drop(['name','country_origin_club','country_new_club'], axis=1, inplace =True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 272,
+   "id": "d8f60ca2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.to_csv('Cleaned Data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 273,
+   "id": "c7b1280d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data', index_col=0)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 274,
+   "id": "60df7169",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 275,
+   "id": "10803f1d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 276,
+   "id": "0b457ad0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 277,
+   "id": "d53b234b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 278,
+   "id": "2b6011e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"Data has  \" + str(data.shape[0]) + \"  records and  \" + str(data.shape[1]) + \"  features\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 279,
+   "id": "b7720f5f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 280,
+   "id": "08843567",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 281,
+   "id": "574e5746",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#data['position'].replace(['Centre-Back', 'Right-Back', 'Left-Back'], 'defence', inplace=True)\n",
+    "#data['position'].replace(['Central Midfield', 'Defensive Midfield', 'Attacking Midfield','Right Midfield', 'Left Midfield'], 'midfield', inplace=True)\n",
+    "#data['position'].replace(['Centre-Forward', 'Left Winger', 'Right Winger','Second Striker'], 'attack', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 282,
+   "id": "ec60d7a9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.dtype"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 283,
+   "id": "b3ebae57",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def customizer(val):\n",
+    "    str(val)          # we used str() because float-point number not accessable ---> 'float value is not subscriptable object'\n",
+    "    if (val[-1] == 'm'): \n",
+    "        val = pd.to_numeric(val[1:-1])  \n",
+    "        return val*10**6\n",
+    "    \n",
+    "    else:\n",
+    "        val = pd.to_numeric(val[1:-3])\n",
+    "        return val*10**3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 284,
+   "id": "a84200ee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 285,
+   "id": "81d48619",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.apply(lambda val : pd.to_numeric(str(val)[1:-1])*10**6 if(str(val)[-1] == 'm') else pd.to_numeric(str(val)[1:-3])*10**3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 286,
+   "id": "3a364aaa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 287,
+   "id": "4373410a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 288,
+   "id": "5922ecce",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 289,
+   "id": "51102505",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age = data.age.astype('f2')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 290,
+   "id": "838d054c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 291,
+   "id": "a5056f06",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.astype('f4')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 292,
+   "id": "aa49b34b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 293,
+   "id": "5d26ce97",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ data['country_origin_club'] == ' Egypt ' ].head(4)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 294,
+   "id": "4083ad20",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#drop unuseful features\n",
+    "data.drop([ 'league_origin_club' , 'league_new_club' , 'date_of_transfer' ], axis=1, inplace= True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 295,
+   "id": "3878524e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.position.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 296,
+   "id": "fb4bb642",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.position.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 297,
+   "id": "73fdc645",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ 25188:25193 ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 298,
+   "id": "0e0f0fd9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "playersNames = data.name[25188:25193].tolist()\n",
+    "playersNames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 299,
+   "id": "9dc5d88f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "\n",
+    "print('position    age')\n",
+    "\n",
+    "li7 = []\n",
+    "\n",
+    "for i in playersNames:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    for player in ffx.find_elements(By.CSS_SELECTOR,'td[class= \"zentriert\"]'):\n",
+    "        li7.append(player.text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li7)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 300,
+   "id": "2a857057",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {25188: 'Right-Back' , 25189: 'Centre-Forward', 25190: 'GoalKeeper', 25191: 'attack', 25192: 'Left-Back'} \n",
+    "              , 'age': {25188: 29 , 25189: 21, 25190: 20, 25191: 20, 25192: 21}\n",
+    "              , 'origin_club': {25188: 'Persiba' , 25189: 'Puebla', 25190: 'Lippstadt', 25191: 'Huddersfield Town', 25192: 'Olimpija'}}\n",
+    "             ,inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 301,
+   "id": "7c548a8d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 302,
+   "id": "3d023c38",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 303,
+   "id": "9bacc229",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 304,
+   "id": "b3d3985f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"Data has  \" + str(data.shape[0]) + \"  records and  \" + str(data.shape[1]) + \"  features\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 305,
+   "id": "e4d71ba6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 306,
+   "id": "06ee14a7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 307,
+   "id": "b0e05683",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#data['position'].replace(['Centre-Back', 'Right-Back', 'Left-Back'], 'defence', inplace=True)\n",
+    "#data['position'].replace(['Central Midfield', 'Defensive Midfield', 'Attacking Midfield','Right Midfield', 'Left Midfield'], 'midfield', inplace=True)\n",
+    "#data['position'].replace(['Centre-Forward', 'Left Winger', 'Right Winger','Second Striker'], 'attack', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 308,
+   "id": "0b17d68f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.dtype"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 309,
+   "id": "c6547f91",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def customizer(val):\n",
+    "    str(val)          # we used str() because float-point number not accessable ---> 'float value is not subscriptable object'\n",
+    "    if (val[-1] == 'm'): \n",
+    "        val = pd.to_numeric(val[1:-1])  \n",
+    "        return val*10**6\n",
+    "    \n",
+    "    else:\n",
+    "        val = pd.to_numeric(val[1:-3])\n",
+    "        return val*10**3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 310,
+   "id": "12298e29",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 311,
+   "id": "8061cb7a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.apply(lambda val : pd.to_numeric(str(val)[1:-1])*10**6 if(str(val)[-1] == 'm') else pd.to_numeric(str(val)[1:-3])*10**3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 312,
+   "id": "1b970645",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 313,
+   "id": "3bc58233",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 314,
+   "id": "6fb3bed1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 315,
+   "id": "d70fc488",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age = data.age.astype('f2')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 316,
+   "id": "7c5276a0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 317,
+   "id": "1a1d8059",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.astype('f4')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 318,
+   "id": "96b057ec",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 319,
+   "id": "1fec181a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ data['country_origin_club'] == ' Egypt ' ].head(4)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 320,
+   "id": "5dd2d49c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#drop unuseful features\n",
+    "data.drop([ 'league_origin_club' , 'league_new_club' , 'date_of_transfer' ], axis=1, inplace= True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 321,
+   "id": "e103e67e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.position.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 322,
+   "id": "1e5130d2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.position.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 323,
+   "id": "cc9fff3b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ 25188:25193 ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 324,
+   "id": "cff9927b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "playersNames = data.name[25188:25193].tolist()\n",
+    "playersNames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 325,
+   "id": "884c4740",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "\n",
+    "print('position    age')\n",
+    "\n",
+    "li7 = []\n",
+    "\n",
+    "for i in playersNames:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    for player in ffx.find_elements(By.CSS_SELECTOR,'td[class= \"zentriert\"]'):\n",
+    "        li7.append(player.text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li7)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 326,
+   "id": "b772cd72",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {25188: 'Right-Back' , 25189: 'Centre-Forward', 25190: 'GoalKeeper', 25191: 'attack', 25192: 'Left-Back'} \n",
+    "              , 'age': {25188: 29 , 25189: 21, 25190: 20, 25191: 20, 25192: 21}\n",
+    "              , 'origin_club': {25188: 'Persiba' , 25189: 'Puebla', 25190: 'Lippstadt', 25191: 'Huddersfield Town', 25192: 'Olimpija'}}\n",
+    "             ,inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 327,
+   "id": "8d2d750d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import io, requests\n",
+    "from selenium import webdriver\n",
+    "from selenium.webdriver.common.keys import Keys\n",
+    "from selenium.webdriver.common.by import By\n",
+    "from selenium.webdriver.support.relative_locator import locate_with\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 328,
+   "id": "a21b1399",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 329,
+   "id": "d72c358a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 330,
+   "id": "fda24d8b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"Data has  \" + str(data.shape[0]) + \"  records and  \" + str(data.shape[1]) + \"  features\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 331,
+   "id": "0c107d16",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 332,
+   "id": "8fc26b01",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 333,
+   "id": "def08f10",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#data['position'].replace(['Centre-Back', 'Right-Back', 'Left-Back'], 'defence', inplace=True)\n",
+    "#data['position'].replace(['Central Midfield', 'Defensive Midfield', 'Attacking Midfield','Right Midfield', 'Left Midfield'], 'midfield', inplace=True)\n",
+    "#data['position'].replace(['Centre-Forward', 'Left Winger', 'Right Winger','Second Striker'], 'attack', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 334,
+   "id": "01de3c4b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.dtype"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 335,
+   "id": "29736ea0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def customizer(val):\n",
+    "    str(val)          # we used str() because float-point number not accessable ---> 'float value is not subscriptable object'\n",
+    "    if (val[-1] == 'm'): \n",
+    "        val = pd.to_numeric(val[1:-1])  \n",
+    "        return val*10**6\n",
+    "    \n",
+    "    else:\n",
+    "        val = pd.to_numeric(val[1:-3])\n",
+    "        return val*10**3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 336,
+   "id": "0bfff6d7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer(\"€1th.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 337,
+   "id": "55afe8fc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.apply(lambda val : pd.to_numeric(str(val)[1:-1])*10**6 if(str(val)[-1] == 'm') else pd.to_numeric(str(val)[1:-3])*10**3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 338,
+   "id": "d33b9ce0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.head(2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 339,
+   "id": "cb46ebd7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.dtypes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 340,
+   "id": "badba0ae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 341,
+   "id": "55af2f68",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age = data.age.astype('f2')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 342,
+   "id": "077eccd9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.describe()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 343,
+   "id": "97c9f3f0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost = data.cost.astype('f4')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 344,
+   "id": "34e0467b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 345,
+   "id": "f6360899",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ data['country_origin_club'] == ' Egypt ' ].head(4)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 346,
+   "id": "b3bbd9c9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#drop unuseful features\n",
+    "data.drop([ 'league_origin_club' , 'league_new_club' , 'date_of_transfer' ], axis=1, inplace= True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 347,
+   "id": "9e9e9094",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.position.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 348,
+   "id": "cdc9c11e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.position.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 349,
+   "id": "b7bff617",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ 25188:25193 ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 350,
+   "id": "611dd418",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "playersNames = data.name[25188:25193].tolist()\n",
+    "playersNames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 351,
+   "id": "62b93091",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "\n",
+    "print('position    age')\n",
+    "\n",
+    "li7 = []\n",
+    "\n",
+    "for i in playersNames:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    for player in ffx.find_elements(By.CSS_SELECTOR,'td[class= \"zentriert\"]'):\n",
+    "        li7.append(player.text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li7)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 352,
+   "id": "183e4517",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {25188: 'Right-Back' , 25189: 'Centre-Forward', 25190: 'GoalKeeper', 25191: 'attack', 25192: 'Left-Back'} \n",
+    "              , 'age': {25188: 29 , 25189: 21, 25190: 20, 25191: 20, 25192: 21}\n",
+    "              , 'origin_club': {25188: 'Persiba' , 25189: 'Puebla', 25190: 'Lippstadt', 25191: 'Huddersfield Town', 25192: 'Olimpija'}}\n",
+    "             ,inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 353,
+   "id": "e1fbbd74",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[ 2753:2758 ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 354,
+   "id": "c780b51a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'position': {2753: 'Right-Back' , 2754: 'Centre-Forward', 2755: 'Centre-Back', 2756: 'midfield', 2757: 'midfield'}},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 355,
+   "id": "60128d9d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 356,
+   "id": "0e32bebd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.new_club.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 357,
+   "id": "068cb4c7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[5420:5424]  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 358,
+   "id": "7385f0a2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[5420:5424].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 359,
+   "id": "5b56095e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li8 = ['Vigor Lamezia', 'Darya Caspian', 'Banbueng FC', 'Ipswich']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 360,
+   "id": "e53e89d0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict( zip( [x for x in range(5420,5424,1)] ,li8) )\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 361,
+   "id": "9358de4c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic },inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 362,
+   "id": "db9b4aa4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[9278:9280]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 363,
+   "id": "59c4fede",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[9278:9280].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 364,
+   "id": "17f8b958",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li1 = []\n",
+    "for i in names:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"hauptlink\"]')\n",
+    "    url = player.find_element(By.TAG_NAME,'a').get_attribute('href')\n",
+    "    ffx.get(url)\n",
+    "    li1.append(ffx.find_element(By.CSS_SELECTOR,'[class=\"data-header__club\"]').find_element(By.TAG_NAME,'a').text)\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 365,
+   "id": "95337562",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li1 = ['NK Pesnica', 'Galway United']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 366,
+   "id": "0c08c592",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([9278,9279], li1))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 367,
+   "id": "601d35dd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 368,
+   "id": "ff4767a8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[31461:31465]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 369,
+   "id": "af597449",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "names = data.name[31461:31465].tolist()\n",
+    "print(names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 370,
+   "id": "a00f7969",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li2 = ['Without Club', 'Without Club', 'Alavés', 'Without Club']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 371,
+   "id": "b81c493f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(31461,31465,1)], li2))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 372,
+   "id": "7be917b7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'new_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 373,
+   "id": "a63a3eda",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.cost.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 374,
+   "id": "fff52dfe",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "for i in data.cost.isna():\n",
+    "    if i == True: \n",
+    "        print(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 375,
+   "id": "0a1ad08f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[21008:21012]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 376,
+   "id": "11f0e27f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "namesOfcost = data.name[21008:21012].tolist()\n",
+    "namesOfcost"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 377,
+   "id": "fe39f5df",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li3 = ['€75Th.', '€100Th.', '€10Th.', '€75Th.']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 378,
+   "id": "2be02759",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "customizer('€75Th.')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 379,
+   "id": "2955c7e8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip([x for x in range(21008,21012,1)], [ customizer(y) for y in li3]))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 380,
+   "id": "8dab2ce2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'cost': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 381,
+   "id": "5cb8e4a9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ffx = webdriver.Chrome()\n",
+    "\n",
+    "ffx.get(\"https://www.transfermarkt.com\")\n",
+    "li3 = []\n",
+    "for i in namesOfcost:\n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').send_keys(i) # Search with player name\n",
+    "    ffx.find_element(By.CSS_SELECTOR,'[class=\"tm-header__input--search-send\"]').send_keys(Keys.ENTER) # press Enter Key\n",
+    "    \n",
+    "    player = ffx.find_element(By.CSS_SELECTOR,'td[class= \"rechts hauptlink\"]')\n",
+    "    li3.append(player.text)\n",
+    "    \n",
+    "    ffx.find_element(By.CSS_SELECTOR, '[class=\"tm-header__input--search-field\"]').clear()\n",
+    "ffx.quit()\n",
+    "print(li3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 382,
+   "id": "9d44a033",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 383,
+   "id": "cc4282a8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('Average in ')\n",
+    "for i in data['country_origin_club'].value_counts().index[0:].to_list():\n",
+    "    print( f'{i} :        { data.age[data.country_origin_club == i].mean() }' )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 384,
+   "id": "378f0448",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "namesOfAge = []\n",
+    "indexOfAge = []\n",
+    "for i in data.age.isna():\n",
+    "    if i == True: \n",
+    "        namesOfAge.append(data.name.iloc[c])\n",
+    "        indexOfAge.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 385,
+   "id": "1134395e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(len(namesOfAge))\n",
+    "namesOfAge"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 386,
+   "id": "c843f252",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li4"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 387,
+   "id": "4d83d988",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ages = [37, 22, 22, 32, 38, 27, 29, 29, 20, 54, 23, 54, 23, 40, 29, 28, 27, 30]\n",
+    "Idx = [4495,6973, 8253, 10008, 12395, 12564, 13974, 23171, 25742, 25945, 26003, 26074, 27572, 32895, 33174, 33243,33423,29557]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 388,
+   "id": "f04e5e7c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip(Idx, ages))\n",
+    "dic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 389,
+   "id": "c03bb51f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'age': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 390,
+   "id": "dfbaacf6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 391,
+   "id": "8a7c82eb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clubs = []\n",
+    "index = []\n",
+    "for i in li5:\n",
+    "    if data.origin_club.loc[i] !=  \"Without Club\" and data.origin_club.loc[i] != 'Unknown' and data.origin_club.loc[i] != 'Career break':\n",
+    "        clubs.append(data.origin_club.loc[i])\n",
+    "        index.append(i)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 392,
+   "id": "dd7001b6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clubs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 393,
+   "id": "e94e663c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "        print(i)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 394,
+   "id": "707d6977",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 395,
+   "id": "17686b61",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "    c+=1\n",
+    "    data.origin_club.loc[i]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 396,
+   "id": "5d13ef7b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "    c+=1\n",
+    "    print(data.origin_club.loc[i])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 397,
+   "id": "9092c45f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = 0\n",
+    "li5 = []\n",
+    "for i in data.country_origin_club.isna():\n",
+    "    if i == True: \n",
+    "        li5.append(c)\n",
+    "    c+=1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 398,
+   "id": "d2be13e7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clubs = []\n",
+    "index = []\n",
+    "for i in li5:\n",
+    "    if data.origin_club.loc[i] !=  \"Without Club\" and data.origin_club.loc[i] != 'Unknown' and data.origin_club.loc[i] != 'Career break':\n",
+    "        clubs.append(data.origin_club.loc[i])\n",
+    "        index.append(i)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 399,
+   "id": "48747d2e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clubs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 400,
+   "id": "28dae525",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "li6 = ['Croatia', 'Ireland', 'unknown', 'Iran', 'Iran', 'Spain', 'Russia']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 401,
+   "id": "c03d9a64",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dic = dict(zip(index,li6))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 402,
+   "id": "28c16fcd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.fillna({'country_origin_club': dic},inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 403,
+   "id": "993e0c39",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.age.isna().sum()         # na values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 404,
+   "id": "1f21aa0c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['country_origin_club'][data.age.isna()].value_counts()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 405,
+   "id": "529c4810",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "countries = data['country_origin_club'][data.age.isna()].value_counts().index.tolist()\n",
+    "countries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 406,
+   "id": "8dc919d2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for country in countries:\n",
+    "    li = []\n",
+    "    Idx = data[ ( data.age.isna() ) & ( data.country_origin_club == country ) ].index.tolist()\n",
+    "    avg = data['age'][data.country_origin_club == country ].mean()\n",
+    "    li.append(avg)\n",
+    "    li *= len(Idx)\n",
+    "    dic = dict(zip( Idx , li ))\n",
+    "    data.fillna({'age': dic }, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 407,
+   "id": "3475e04b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.drop(['name','country_origin_club','country_new_club'], axis=1, inplace =True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 408,
+   "id": "74cb04ea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.to_csv('Cleaned Data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 409,
+   "id": "955c2688",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data', index_col=0)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 410,
+   "id": "b03df4ce",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 411,
+   "id": "7c6b7039",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.isna.sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 412,
+   "id": "69ef02aa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 413,
+   "id": "b5f4a23f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.age.isna()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 414,
+   "id": "e8d6651f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df[df.age.isna()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 415,
+   "id": "6344c90f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = pd.read_csv('Summer22_FootballTransfers.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 416,
+   "id": "52e8024f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x[33274]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 417,
+   "id": "326d6c7f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x.loc[33274]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 418,
+   "id": "4342a052",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 419,
+   "id": "227a2a60",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()].fillna(data.age.mean(),inplace= 1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 420,
+   "id": "d035f07a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()].fillna(data.age.mean(),inplace= True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 421,
+   "id": "4a8a1bee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 422,
+   "id": "c1b44738",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()] = data[data.age.isna()].fillna(data.age.mean())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 423,
+   "id": "1c7f8e72",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 424,
+   "id": "15f47059",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.to_csv('Cleaned Data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 425,
+   "id": "7f92316a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data', index_col=0)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 426,
+   "id": "1855a582",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df[df.age.isna()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 427,
+   "id": "341e47c7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data', index_col= 0 )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 428,
+   "id": "8cab6176",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 429,
+   "id": "ea94916e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.duplicated().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 430,
+   "id": "56bd39d4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.duplicated()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 431,
+   "id": "45668636",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df[df.duplicated()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 432,
+   "id": "a269c803",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ids = df[\"age\"]\n",
+    "df[ids.isin(ids[ids.duplicated()])].sort_values(\"age\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 433,
+   "id": "8df207fa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ids = df[\"age\"]\n",
+    "df[ids.isin(ids[ids.duplicated()])].sort_values(\"age\").head(60)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 434,
+   "id": "19e7275a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ids = df[\"age\"]\n",
+    "df[ids.isin(ids[ids.duplicated()])].sort_values(\"age\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 435,
+   "id": "89984f08",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df[df.duplicated(keep=False)]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 436,
+   "id": "b83bbb8f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df[df.duplicated(keep=False)].head(60)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 437,
+   "id": "60f071ed",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.drop_duplicates(keep='frist', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 438,
+   "id": "ceb68c49",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.drop_duplicates(keep='first', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 439,
+   "id": "1bc70781",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df[df.duplicated(keep=False)].head(60)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 440,
+   "id": "96f9464e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 441,
+   "id": "975f58a1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.duplicated(keep=False)].head(60)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 442,
+   "id": "9c1ac8ae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.drop_duplicates(keep='first', inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 443,
+   "id": "1b053e77",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.drop(['name','country_origin_club','country_new_club'], axis=1, inplace =True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 444,
+   "id": "70bfbf87",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.to_csv('Cleaned Data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 445,
+   "id": "8c8e4eb0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Cleaned Data', index_col= 0 )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 446,
+   "id": "ab629424",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 447,
+   "id": "d93bdaaf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.boxplot(data['age'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 448,
+   "id": "16fdabf6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[data.age.isna()] = data[data.age.isna()].fillna(data.age.median())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 449,
+   "id": "d63cbe96",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(np.where(data['age']>10))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 450,
+   "id": "3ace93f8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(np.where(data['age']>38))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 451,
+   "id": "56687177",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(np.where(data['age']>40))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 452,
+   "id": "eed81a47",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.boxplot(data['age'])\n",
+    "plt.xticks(np.arange(15,55,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 453,
+   "id": "3221a759",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.boxplot(data['age'])\n",
+    "plt.xticks([15,20,25,30,35,40,45,50,55]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 454,
+   "id": "aae4c095",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.boxplot(data['age'])\n",
+    "plt.xticks([15,20,25,30,35,40,45,50,55])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 455,
+   "id": "1e53a5b4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.boxplot(data['age'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 456,
+   "id": "d99b2a95",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.boxplot(data['age'])\n",
+    "plt.yticks([15,20,25,30,35,40,45,50,55])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 457,
+   "id": "426a6217",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plt.boxplot(data['age'])\n",
+    "plt.yticks(np.arange(15,55,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 458,
+   "id": "a594e3b1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.boxplot(data['age'])\n",
+    "sns.yticks(np.arange(15,55,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 459,
+   "id": "c6add92b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.boxplot(data['age'])\n",
+    "sns.set_xticks(np.arange(15,55,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 460,
+   "id": "c5e6a221",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "s = sns.boxplot(data['age'])\n",
+    "s.set_xticks(np.arange(15,55,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 461,
+   "id": "bf54d254",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "s = sns.boxplot(data['age'])\n",
+    "s.set_xticks(np.arange(15,55,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 462,
+   "id": "cc10dee5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook\n",
+    "s = sns.boxplot(data['age'])\n",
+    "s.set_xticks(np.arange(15,55,2))"
+   ]
+  }
+ ],
+ "metadata": {},
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
