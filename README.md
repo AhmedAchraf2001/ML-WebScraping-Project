@@ -1,13 +1,13 @@
 # Scrapping data from the transferMarket website about Summer Football 2022 markert transfer
-Data scraped from [Market Transfer website](https://www.transfermarkt.com/)n below images show the data that has scraped for each player. 
+Data scraped from [Market Transfer website](https://www.transfermarkt.com/) in below images show the data that has scraped for each player. 
 
 for example Phili Foden mancity player 
 - **Frist webpage has his name, age, market value and other.**
 - **Second webpage has some insights about progress with team.**
-- **Trid webpage has some insights about progress with National team.**
+- **Third webpage has some insights about progress with National team.**
 
 
-<img align="left" width="320" src='00 Docs/image_1.png'>    
+<img align="left" width="310" src='00 Docs/image_1.png'>    
 <img align="right" width="320" src='00 Docs/image_2.png'>  
 <img align="center" width="320" src='00 Docs/image_3.png'>  
 
@@ -15,7 +15,7 @@ for example Phili Foden mancity player
 </br>
 
 # Dataset Descrption
-Data contains 28752 players each one has 19 feature represents below.
+### Data contains 28401 players each one has 19 feature represents below.
 
 |Feature Name    |Type                           |Description                    |
 |----------------|-------------------------------|-------------------------------|
@@ -42,27 +42,33 @@ Data contains 28752 players each one has 19 feature represents below.
 
 
 
-</br>
-</br>
 
+</br>
 
 	
 
 ## libraries used 
-Regex used to extract data from the website using some libraries:
+### Regex used to extract data from the website using some libraries:
 1. **selenium**
 2. **beautifulsoup**
 3. **requests**
 
 
-
-
-
-
+</br>
 
 ## Machine learning algorithms
-|Feature Name    	 |Train accuracy %               |Test accuracy %       |
+|Model Name     	 |Train accuracy %               |Test accuracy %       |
 |------------------------|-------------------------------|----------------------|
 |Simple Linear Regression|**75.07**           		 |**71.97**   		|
-|XGBoost Algorithm       |**94.45**                    	 |**93.41**      	|
-|Neural Network          |Numerical                      |No. Played matches    |
+|XGBoost Algorithm       |**99.15**                    	 |**98.99**      	|
+</br>
+
+|Model Name     	 |Train MSE                      |Test MSE              |
+|------------------------|-------------------------------|----------------------|
+|Neural Network          |**2.6162e-05**                 |**2.0937e-05**        |
+
+</br>
+</br>
+
+### Graph show losses during training and validation 
+<img align="center" src='00 Docs/model_losses.png'>  
