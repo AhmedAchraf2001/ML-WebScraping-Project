@@ -6,10 +6,17 @@ for example Phili Foden mancity player
 - **Second webpage has some insights about progress with team.**
 - **Third webpage has some insights about progress with National team.**
 
+</br>
+</br>
 
-<img align="left" width="380" src='00 Docs/image_1.png'>    
-<img align="right" width="380" src='00 Docs/image_2.png'>  
-<img align="center" width="380" src='00 Docs/image_3.png'>  
+<img align="left" width="300" src='00 Docs/image_1.png'>    
+
+
+<img align="right" width="310" src='00 Docs/image_2.png'>  
+
+
+
+<img align="center" width="310" src='00 Docs/image_3.png'>  
 
 </br>
 </br>
