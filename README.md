@@ -9,14 +9,12 @@ for example Phili Foden mancity player
 </br>
 </br>
 
-<img align="left" width="300" src='00 Docs/image_1.png'>    
-
-
-<img align="right" width="310" src='00 Docs/image_2.png'>  
-
-
-
-<img align="center" width="310" src='00 Docs/image_3.png'>  
+<div>
+	<img align="center" width="300"  src='00 Docs/image_1.png'> 
+	<img align="center" width="300"  src='00 Docs/image_2.png'> 
+ 	<img align="center" width="300"  src='00 Docs/image_3.png'> 
+  
+</div>
 
 </br>
 </br>
