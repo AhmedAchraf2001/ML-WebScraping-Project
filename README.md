@@ -7,9 +7,9 @@ for example Phili Foden mancity player
 - **Third webpage has some insights about progress with National team.**
 
 
-<img align="left" width="310" src='00 Docs/image_1.png'>    
-<img align="right" width="320" src='00 Docs/image_2.png'>  
-<img align="center" width="320" src='00 Docs/image_3.png'>  
+<img align="left" width="380" src='00 Docs/image_1.png'>    
+<img align="right" width="380" src='00 Docs/image_2.png'>  
+<img align="center" width="380" src='00 Docs/image_3.png'>  
 
 </br>
 </br>
